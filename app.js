@@ -1,10 +1,12 @@
 const path = require('path');
+const fs = require('fs');
 
 const express = require('express');
 const mongoose = require('mongoose');
 const bodyparser = require('body-parser');
 const multer = require('multer');
-const helmet =require ('helmet');
+const helmet = require('helmet');
+const morgan = require('morgan');
 
 const feedRoutes = require('./routes/feed');
 const authRoutes = require('./routes/auth');
@@ -32,7 +34,14 @@ const fileFilter = (req, file, cb) => {
   }
 };
 
+const accessLogStream = fs.createWriteStream(
+  path.join(__dirname, 'access.log'),
+  { flags: 'a' }
+);
+
 app.use(helmet());
+app.use(morgan('combined', { stream: accessLogStream }));
+
 app.use(bodyparser.json());
 app.use(
   multer({ storage: fileStorage, fileFilter: fileFilter }).single('image')
@@ -60,8 +69,9 @@ app.use((err, req, res, next) => {
   res.status(status).json({ message: message, data: data });
 });
 
-const MONGODB_URI =
-  `mongodb+srv://${process.env.MONGO_USER}:${process.env.MONGO_PASSWORD}@nodejs-1qztw.mongodb.net/${process.env.MONGO_DEFAULT_DATABASE}`;
+const MONGODB_URI = `mongodb+srv://${process.env.MONGO_USER}:${
+  process.env.MONGO_PASSWORD
+}@nodejs-1qztw.mongodb.net/${process.env.MONGO_DEFAULT_DATABASE}`;
 
 mongoose
   .connect(MONGODB_URI)
