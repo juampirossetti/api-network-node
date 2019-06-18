@@ -4,6 +4,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const bodyparser = require('body-parser');
 const multer = require('multer');
+const helmet =require ('helmet');
 
 const feedRoutes = require('./routes/feed');
 const authRoutes = require('./routes/auth');
@@ -31,6 +32,7 @@ const fileFilter = (req, file, cb) => {
   }
 };
 
+app.use(helmet());
 app.use(bodyparser.json());
 app.use(
   multer({ storage: fileStorage, fileFilter: fileFilter }).single('image')
@@ -59,12 +61,12 @@ app.use((err, req, res, next) => {
 });
 
 const MONGODB_URI =
-  'mongodb+srv://node-complete:node-complete@nodejs-1qztw.mongodb.net/api-rest';
+  `mongodb+srv://${process.env.MONGO_USER}:${process.env.MONGO_PASSWORD}@nodejs-1qztw.mongodb.net/${process.env.MONGO_DEFAULT_DATABASE}`;
 
 mongoose
   .connect(MONGODB_URI)
   .then(result => {
-    const server = app.listen(8080);
+    const server = app.listen(process.env.PORT || 8080);
     const io = require('./socket').init(server);
     io.on('connection', socket => {
       console.log('Client connected');
