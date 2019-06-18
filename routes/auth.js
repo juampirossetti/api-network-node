@@ -12,11 +12,11 @@ router.put(
   [
     body('email')
       .isEmail()
-      .withMessage('Please enter a valid email address')
+      .withMessage('Please enter a valid email.')
       .custom((value, { req }) => {
-        return User.findOne({ email: req.body.email }).then(userDoc => {
+        return User.findOne({ email: value }).then(userDoc => {
           if (userDoc) {
-            return Promise.reject('E-mail address already exists');
+            return Promise.reject('E-Mail address already exists!');
           }
         });
       })
@@ -34,7 +34,7 @@ router.put(
 
 router.post('/login', authController.login);
 
-router.get('/status', isAuth, authController.getStatus);
+router.get('/status', isAuth, authController.getUserStatus);
 
 router.patch(
   '/status',
@@ -45,7 +45,7 @@ router.patch(
       .not()
       .isEmpty()
   ],
-  authController.updateStatus
+  authController.updateUserStatus
 );
 
 module.exports = router;
